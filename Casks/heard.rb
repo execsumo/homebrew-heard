@@ -1,7 +1,7 @@
 cask "heard" do
-  version "0.2.2"
+  version "0.2.3"
   # Run scripts/dmg.sh to build the release DMG, then fill in the SHA256 it prints.
-  sha256 "65a620aa747a55121c4d82cfeab598bfc5f0796c4f402cebed7b91a0c6f906b3"
+  sha256 "205bf0da99528d0a6cbf846997ac5039ef47049b13c256847f16e1ee74484a8f"
 
   url "https://github.com/execsumo/heard/releases/download/v#{version}/Heard-#{version}.dmg"
   name "Heard"
@@ -13,8 +13,18 @@ cask "heard" do
 
   app "Heard.app"
 
+  # Quit the running menu bar app before uninstalling so the bundle isn't replaced
+  # under a live process (stale TCC/permission state otherwise survives the swap).
+  uninstall quit: "com.execsumo.heard"
+
+  # `brew uninstall --zap heard` removes all app data. Note: a plain `brew uninstall`
+  # intentionally keeps these so settings/speaker profiles survive an upgrade.
   zap trash: [
+    "~/Library/Application Support/FluidAudio", # on-device ML model cache (can be several GB)
     "~/Library/Application Support/Heard",
-    "~/Library/Preferences/com.execsumo.heard.plist",
+    "~/Library/Caches/com.execsumo.heard",
+    "~/Library/HTTPStorages/com.execsumo.heard",
+    "~/Library/Preferences/com.execsumo.heard.plist", # UserDefaults incl. cached TCC-granted flags
+    "~/Library/Saved Application State/com.execsumo.heard.savedState",
   ]
 end
